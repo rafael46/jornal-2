@@ -2,6 +2,8 @@ import React, { Component } from 'react';
 import { Auth, Logger } from 'aws-amplify';
 import { Container, Form, InputGroup, Button, Alert } from 'bootstrap-4-react';
 
+import store, { updateProfile } from '../store';
+
 const logger = new Logger('Profile');
 
 export default class Profile extends Component {
@@ -56,6 +58,8 @@ export default class Profile extends Component {
 
   saveSuccess(data) {
     logger.info('saved user profile', data);
+    store.dispatch(updateProfile(this.state.profile));   //  LINE ADDED --------------------------------------------------------------
+
   }
 
   handleError(error) {

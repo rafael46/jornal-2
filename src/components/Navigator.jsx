@@ -1,8 +1,10 @@
 import React, { Component } from 'react';
 import { Navbar, Nav, BSpan } from 'bootstrap-4-react';
 import { HashRouter, Route, Switch } from 'react-router-dom';
-import { Auth, Hub, Logger } from 'aws-amplify';
+import {  Logger } from 'aws-amplify';  //Auth, Hub,
 import { JSignOut } from './auth';
+
+import store from '../store';
 
 const HomeItems = props => (
   <React.Fragment>
@@ -55,30 +57,42 @@ export default class Navigator extends Component {
   constructor(props) {
     super(props);
 
-    this.loadUser = this.loadUser.bind(this);
+    this.storeListener = this.storeListener.bind(this);
 
-    Hub.listen('auth', this, 'navigator'); // Add this component as a listener of auth events.
+    this.state = { user: null, profile: null }
 
-    this.state = { user: null }
+    // this.loadUser = this.loadUser.bind(this);
+    // Hub.listen('auth', this, 'navigator'); // Add this component as a listener of auth events.
+    // this.state = { user: null }
   }
 
   componentDidMount() {
-    this.loadUser(); // The first check
+    // this.loadUser(); // The first check
+    this.unsubscribeStore = store.subscribe(this.storeListener);
+  }
+  componentWillUnmount() {
+    this.unsubscribeStore();
   }
 
-  onHubCapsule(capsule) {
-    logger.info('on Auth event', capsule);
-    this.loadUser(); // Triggered every time user sign in / out.
+  storeListener() {
+    logger.info('redux notification');
+    const state = store.getState();
+    this.setState({ user: state.user, profile: state.profile });
   }
 
-  loadUser() {
-    Auth.currentAuthenticatedUser()
-      .then(user => this.setState({ user: user }))
-      .catch(err => this.setState({ user: null }));
-  }
+  // onHubCapsule(capsule) {
+  //   logger.info('on Auth event', capsule);
+  //   this.loadUser(); // Triggered every time user sign in / out.
+  // }
+  // loadUser() {
+  //   Auth.currentAuthenticatedUser()
+  //     .then(user => this.setState({ user: user }))
+  //     .catch(err => this.setState({ user: null }));
+  // }
 
   render() {
     const { user } = this.state;
+    const profile = this.state.profile || {};
 
     return (
       <Navbar expand="md" dark bg="dark" fixed="top">
@@ -96,7 +110,7 @@ export default class Navigator extends Component {
             </HashRouter>
           </Navbar.Nav>
           <Navbar.Text mr="2">
-            { user? 'Hi ' + user.username : 'Please sign in' }
+            { user? 'Hi ' + (profile.given_name || user.username) : 'Please sign in' }
           </Navbar.Text>
           { user && <JSignOut /> }
         </Navbar.Collapse>
