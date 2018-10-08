@@ -17,3 +17,9 @@ remote:
 To https://github.com/rafael46/jornal-2.git
  * [new branch]      master -> master
 ------------------------------------------------------------------------------
+fatal: The current branch master has no upstream branch.
+To push the current branch and set the remote as upstream, use
+
+    git push --set-upstream origin master
+-------------------------------------------------------------------------------------
+
