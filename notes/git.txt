@@ -5,4 +5,15 @@ git add README.md
 git commit -m "first commit"
 git remote add origin https://github.com/rafael46/jornal-2.git
 git push -u origin master
-
+-----------------------------------------------------------------------------
+…or push an existing repository from the command line
+git remote add origin https://github.com/rafael46/jornal-2.git
+git push -u origin master
+-------------------------------------------------------------------------------
+remote:
+remote: Create a pull request for 'master' on GitHub by visiting:
+remote:      https://github.com/rafael46/jornal-2/pull/new/master
+remote:
+To https://github.com/rafael46/jornal-2.git
+ * [new branch]      master -> master
+------------------------------------------------------------------------------
