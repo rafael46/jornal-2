@@ -25,6 +25,12 @@ export default class AmplifyBridge {
       .catch(err => this.checkUserError(err));
   }
 
+  loadUserInfo(user) {
+    Auth.currentUserInfo()
+      .then(info => this.loadUserInfoSuccess(user, info))
+      .catch(err => this.loadUserInfoError(user, err));   // error mispelled
+  }
+
   loadProfile(user) {
     Auth.userAttributes(user)
       .then(data => this.loadProfileSuccess(data))
@@ -33,7 +39,7 @@ export default class AmplifyBridge {
 
   checkUserSuccess(user) {
     logger.info('check user success', user);
-    this.store.dispatch(switchUser(user));
+    this.loadUserInfo(user); // Defer store.dispatch to loadUserInfo
     this.loadProfile(user);
   }
 
@@ -41,6 +47,17 @@ export default class AmplifyBridge {
     logger.info('check user error', err);
     this.store.dispatch(switchUser(null));
     this.store.dispatch(deleteProfile());
+  }
+
+  loadUserInfoSuccess(user, info) {
+    logger.info('load user info success', user, info);
+    Object.assign(user, info);
+    this.store.dispatch(switchUser(user));
+  }
+
+  loadUserInfoError(user, err) {
+    logger.info('load user info error', err);
+    this.store.dispatch(switchUser(user)); // Still dispatchs user object
   }
 
   loadProfileSuccess(data) {

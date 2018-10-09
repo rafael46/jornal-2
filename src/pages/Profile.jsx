@@ -10,19 +10,18 @@ export default class Profile extends Component {
   constructor(props) {
     super(props);
     this.handleInputChange = this.handleInputChange.bind(this);
-    this.loadProfile = this.loadProfile.bind(this);
     this.saveProfile = this.saveProfile.bind(this);
-    this.state = { profile: {given_name: '', family_name: ''} };
+    this.storeListener = this.storeListener.bind(this);
+    const state = store.getState();
+    this.state = { user: state.user, profile: state.profile };
   }
 
   componentDidMount() {
-    if (this.props.user) { this.loadProfile() }
+    this.unsubscribeStore = store.subscribe(this.storeListener);
   }
 
-  componentDidUpdate(prevProps) {
-    if (!prevProps.user && this.props.user) {
-      this.loadProfile();
-    }
+  componentWillUnmount() {
+    this.unsubscribeStore();
   }
 
   handleInputChange(name, value) {
@@ -31,21 +30,14 @@ export default class Profile extends Component {
     this.setState({ profile: profile });
   }
 
-  loadProfile() {
-    const { user } = this.props;
-    Auth.userAttributes(user)
-      .then(data => this.loadSuccess(data))
-      .catch(err => this.handleError(err));
-  }
-
   saveProfile() {
-    const { user } = this.props;
+    const { user, profile } = this.state;
     if (!user) {
       this.handleError('No user to save to');
       return;
     }
 
-    Auth.updateUserAttributes(user, this.state.profile)
+    Auth.updateUserAttributes(user, profile)
       .then(data => this.saveSuccess(data))
       .catch(err => this.handleError(err));
   }
@@ -58,8 +50,7 @@ export default class Profile extends Component {
 
   saveSuccess(data) {
     logger.info('saved user profile', data);
-    store.dispatch(updateProfile(this.state.profile));   //  LINE ADDED --------------------------------------------------------------
-
+    store.dispatch(updateProfile(this.state.profile));
   }
 
   handleError(error) {
@@ -75,6 +66,13 @@ export default class Profile extends Component {
       .filter(attr => ['given_name', 'family_name'].includes(attr.Name))
       .forEach(attr => profile[attr.Name] = attr.Value);
     return profile;
+  }
+
+  storeListener() {
+    logger.info('redux notification');
+    const state = store.getState();
+    logger.info('state from redux', state);
+    this.setState({ user: state.user, profile: state.profile });
   }
 
   render() {

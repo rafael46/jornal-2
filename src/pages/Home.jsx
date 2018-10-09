@@ -1,21 +1,39 @@
 import React, { Component } from 'react';
 
+import { Unexpected, Unauthorized } from '../components';
+import { Album } from '../components/album';
 
-import { Lead, BSpan } from 'bootstrap-4-react';
+const padding = n => {
+  return n > 9 ? n : '0' + n;
+}
+
+const today = () => {
+  const dt = new Date();
+  return [
+    dt.getFullYear(),
+    padding(dt.getMonth() + 1),
+    padding(dt.getDate())
+  ].join('-');
+}
+
+const album_path = user_id => {
+  return user_id + '/' + today() + '/';
+}
 
 export default class Home extends Component {
   render() {
     const { user } = this.props;
 
+    if (!user) { return <Unauthorized /> }
+    if (!user.id) { return <Unexpected /> }
+
     return (
       <React.Fragment>
-        <h1>Home</h1>
-        { user && <Lead>You are signed in as  <BSpan font="italic">{user.username}</BSpan>.</Lead> }
+        <Album path={album_path(user.id)} />
       </React.Fragment>
     )
   }
 }
-
 
 // export default class Home extends Component {
 //   render() {
